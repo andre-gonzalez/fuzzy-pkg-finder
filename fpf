@@ -121,7 +121,7 @@ Official() {
 
 	# Use fzf to select packages
 	cat /tmp/fpf-packages | fzf -q "$1" -e -m \
-		--preview='cat <(pacman -Si {1}) <(pacman -Fl {1} | awk "{print \$2}")' \
+		--preview='begin; pacman -Si {1}; pacman -Fl {1} | awk "{print \$2}"; end' \
 		--preview-window=55%:wrap:border-sharp \
 		--layout=reverse \
 		--marker='>>' \
