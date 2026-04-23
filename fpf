@@ -112,7 +112,7 @@ Official() {
 
     # Use fzf to select packages
     cat /tmp/fpf-packages | fzf -q "$1" -e -m \
-        --preview='cat <(pacman -Si {1}) <(pacman -Fl {1} | awk "{print \$2}")' \
+        --preview='pacman -Si {1}; pacman -Fl {1} | awk "{print \$2}"' \
         --preview-window=55%:wrap:border-sharp \
         --layout=reverse \
         --marker='>>' \
@@ -136,7 +136,7 @@ Official() {
 Installed() {
     expac '%-20n\t%d' |
     fzf -q "$1" -e -m \
-    --preview='cat <(pacman -Qik {1}) <(echo "") <(pacman -Fl {1} | awk "{print \$2}")' \
+    --preview='pacman -Qik {1}; echo ""; pacman -Fl {1} | awk "{print \$2}"' \
     --preview-window=65%:wrap \
     --layout=reverse \
     --marker='>>' \
@@ -158,7 +158,7 @@ Installed() {
 Remove() {
     expac '%-20n\t%d' |
     fzf -q "$1" -e -m \
-    --preview='cat <(pacman -Si {1} 2>/dev/null || yay -Qi {1} 2>/dev/null || paru -Qi {1}) <(pacman -Ql {1} | awk "{print \$2}")' \
+    --preview='pacman -Si {1} 2>/dev/null || yay -Qi {1} 2>/dev/null || paru -Qi {1}; pacman -Ql {1} | awk "{print \$2}"' \
     --preview-window=65%:wrap \
     --layout=reverse \
     --marker='>>' \
@@ -179,7 +179,7 @@ Remove() {
 #	Update installed pkgs
 Update() (
     viewUpdates() {
-        fzf --preview='cat <(pacman -Si {1}) <(pacman -Fl {1} | awk "{print \$2}")' \
+        fzf --preview='pacman -Si {1}; pacman -Fl {1} | awk "{print \$2}"' \
         --preview-window=65%:wrap \
         --layout=reverse \
         --marker='>>' \
@@ -207,7 +207,7 @@ Update() (
 Aur() {
     AurFD	
     fzf -q "$1" -e -m \
-    --preview='cat <(yay -Si {1} 2>/dev/null || paru -Si {1}) <(pacman -Ql {1} 2>/dev/null | awk "{print \$2}")' \
+    --preview='yay -Si {1} 2>/dev/null || paru -Si {1}; pacman -Ql {1} 2>/dev/null | awk "{print \$2}"' \
     --preview-window=55%:wrap:border-sharp \
     --layout=reverse \
     --marker='>>' \
@@ -223,7 +223,7 @@ Aur() {
     --bind ctrl-n:next-selected,ctrl-b:prev-selected \
     --bind 'ctrl-/:change-preview-window(hidden|)' \
     --bind=ctrl-p:preview:'curl --silent https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD\?h={1}' \
-    --bind=ctrl-x:preview:'cat <(yay -Si {1} 2>/dev/null || paru -Si {1}) <(pacman -Ql {1} 2>/dev/null | awk "{print \$2}")' \
+    --bind=ctrl-x:preview:'yay -Si {1} 2>/dev/null || paru -Si {1}; pacman -Ql {1} 2>/dev/null | awk "{print \$2}"' \
     < /tmp/aur/fpf-packages-meta |
     awk '{print $1}' |
     sed -e 's/\*$//' |
@@ -237,7 +237,7 @@ AurInstalled() {
     grep -w "^$pkgName " /tmp/aur/fpf-packages-meta >> /tmp/aur/fpf-installed
     done < <(pacman -Qqm)
     fzf -q "$1" -e -m \
-    --preview 'cat <(pacman -Qik {1}) <(echo "") <(pacman -Ql {1} | awk "{print \$2}")' \
+    --preview 'pacman -Qik {1}; echo ""; pacman -Ql {1} | awk "{print \$2}"' \
     --preview-window=65%:wrap \
     --layout=reverse \
     --marker='>>' \
@@ -252,8 +252,7 @@ AurInstalled() {
     --bind 'ctrl-/:change-preview-window(hidden|)' \
     --bind ctrl-n:next-selected,ctrl-b:prev-selected \
     --bind=ctrl-p:preview:'curl --silent https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD\?h={1}' \
-    --bind=ctrl-x:preview:'cat <(pacman -Si {1} 2>/dev/null || yay -Qi {1} 2>/dev/null ||
-    paru -Qi {1}) <(pacman -Ql {1} | awk "{print \$2}")' \
+    --bind=ctrl-x:preview:'pacman -Si {1} 2>/dev/null || yay -Qi {1} 2>/dev/null || paru -Qi {1}; pacman -Ql {1} | awk "{print \$2}"' \
     < /tmp/aur/fpf-installed |
     awk '{print $1}' |
     xargs -ro pacman -Qik
@@ -262,7 +261,7 @@ AurInstalled() {
 #	Update AUR installed pkgs
 UpdateAURpkgs() (
     viewAURUpdates() {
-        fzf --preview='cat <(yay -Si {1} 2>/dev/null || paru -Si {1}) <(pacman -Ql {1} 2>/dev/null | awk "{print \$2}")' \
+        fzf --preview='yay -Si {1} 2>/dev/null || paru -Si {1}; pacman -Ql {1} 2>/dev/null | awk "{print \$2}"' \
         --preview-window=65%:wrap \
         --layout=reverse \
         --marker='>>' \
@@ -276,8 +275,7 @@ UpdateAURpkgs() (
         --bind=ctrl-h:preview:"cat /tmp/fpf-help" \
         --bind 'ctrl-/:change-preview-window(hidden|)' \
         --bind=ctrl-p:preview:'curl --silent https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD\?h={1}' \
-        --bind=ctrl-x:preview:'cat <(pacman -Si {1} 2>/dev/null || yay -Qi {1} 2>/dev/null ||
-        paru -Qi {1}) <(pacman -Ql {1} | awk "{print \$2}")' < "/tmp/aur/fpf-updates" > /dev/null
+        --bind=ctrl-x:preview:'pacman -Si {1} 2>/dev/null || yay -Qi {1} 2>/dev/null || paru -Qi {1}; pacman -Ql {1} | awk "{print \$2}"' < "/tmp/aur/fpf-updates" > /dev/null
         [[ "$(printf '\nWould you like to update? [y/N]> ' >&2; read; echo $REPLY)" == [Nn]* ]] \
           && printf "\nPlease update soon :(\n" || $AHELPRUPDATE
         rm /tmp/aur/fpf-updates
@@ -296,8 +294,7 @@ Orphans() {
     expac '%-20n\t%d' "$pkgName" >> /tmp/fpf-orphans
     done < <(pacman -Qtdq)
     fzf -q "$1" -e -m \
-    --preview='cat <(pacman -Qik {1} 2>/dev/null || yay -Qi {1} 2>/dev/null ||
-    paru -Qi {1}) <(pacman -Ql {1} | awk "{print \$2}")' \
+    --preview='pacman -Qik {1} 2>/dev/null || yay -Qi {1} 2>/dev/null || paru -Qi {1}; pacman -Ql {1} | awk "{print \$2}"' \
     --preview-window=65%:wrap \
     --layout=reverse \
     --marker='>>' \
